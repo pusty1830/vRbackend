@@ -18,6 +18,7 @@ exports.fetchLiveDataFromCoinGecko = async () => {
         page: 1,
       },
     });
+    console.log(response.data);
     return response.data;
   } catch (error) {
     if (error.response?.status === 429) {
@@ -65,9 +66,10 @@ exports.overwriteCurrentData = async (coins) => {
     symbol: coin.symbol,
     price: coin.current_price,
     marketCap: coin.market_cap,
-    priceChange24h: coin.price_change_percentage_24h,
+    change24h: coin.price_change_percentage_24h,
     timestamp: new Date(),
   }));
+  clg;
 
   await CurrentCoin.deleteMany();
   await CurrentCoin.insertMany(timestampedCoins);
