@@ -3,6 +3,7 @@ const CurrentCoin = require("../model/currentCoin");
 const HistoryCoin = require("../model/historyCoin");
 
 const COINGECKO_URL = "https://api.coingecko.com/api/v3/coins/markets";
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 /**
  * Fetches top 10 coins from CoinGecko with retry for rate limit (429).
@@ -30,8 +31,32 @@ exports.fetchLiveDataFromCoinGecko = async () => {
 };
 
 /**
+ * Returns cached live data from DB if it's recent,
+ * otherwise fetches from CoinGecko and updates DB.
+ */
+exports.getCachedLiveData = async () => {
+  const latest = await CurrentCoin.find({}).sort({ timestamp: -1 });
+
+  if (latest.length > 0) {
+    const lastUpdated = latest[0].timestamp;
+    const now = new Date();
+
+    const age = now - new Date(lastUpdated);
+
+    if (age < CACHE_DURATION) {
+      console.log("[Cache] Serving live coin data from cache.");
+      return latest;
+    }
+  }
+
+  console.log("[Cache] Cache expired or empty. Fetching fresh data...");
+  const freshCoins = await exports.fetchLiveDataFromCoinGecko();
+  await exports.overwriteCurrentData(freshCoins);
+  return await CurrentCoin.find({}).sort({ marketCap: -1 });
+};
+
+/**
  * Overwrites CurrentCoin collection with fresh data.
- * Automatically appends a timestamp to each coin.
  */
 exports.overwriteCurrentData = async (coins) => {
   const timestampedCoins = coins.map((coin) => ({
