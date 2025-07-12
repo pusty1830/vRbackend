@@ -69,7 +69,7 @@ exports.overwriteCurrentData = async (coins) => {
     change24h: coin.price_change_percentage_24h,
     timestamp: new Date(),
   }));
-  clg;
+
 
   await CurrentCoin.deleteMany();
   await CurrentCoin.insertMany(timestampedCoins);
