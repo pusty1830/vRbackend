@@ -4,7 +4,7 @@ const MSG = require("../utils/messages");
 
 exports.getLiveCoins = async (req, res, next) => {
   try {
-    const coins = await coinService.fetchLiveDataFromCoinGecko();
+    const coins = await coinService.getCachedLiveData();
     res.status(HTTP.OK).json({
       success: true,
       message: MSG.SUCCESS.LIVE_COINS_FETCHED,
