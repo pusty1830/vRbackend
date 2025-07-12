@@ -21,6 +21,10 @@ app.use(express.json());
 // Routes
 app.use("/api", coinRoutes);
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "✅ API is running successfully!" });
+});
+
 // 404 Handler
 app.use(notFound);
 
